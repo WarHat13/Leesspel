@@ -105,6 +105,14 @@ html, body {
 #stamps {
   display: flex;
   gap: 6px;
+  max-width: 40vw; /* hou stempels binne skerm */
+  overflow: hidden; /* geen horisontale scroll */
+}
+
+#stamps img {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
 }
 
 #stamps img {
