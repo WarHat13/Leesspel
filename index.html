@@ -95,8 +95,19 @@ html, body {
   padding: 0 14px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 18px;
   font-weight: 700;
+}
+
+#stamps {
+  display: flex;
+  gap: 6px;
+}
+
+#stamps img {
+  width: 32px;
+  height: 32px;
 }
 
 .sentence {
@@ -112,7 +123,7 @@ html, body {
   justify-content: center;
   gap: 15px;
   margin-top: 28px;
-  padding: 0 0px; /* skuif weg van skermkante */
+  padding: 0 20px;
 }
 
 .choice {
@@ -264,7 +275,22 @@ function loadNext(){
 
 function check(w){
   clearInterval(timer);
-  if(w===current.a){ score++; }
+
+  if(w === current.a){
+    score++;
+
+    // Voeg ducky-stempel by
+    let stamp = document.createElement('img');
+    stamp.src = 'Eend.png';
+    stamp.alt = 'Ducky';
+    document.getElementById('stamps').appendChild(stamp);
+
+  } else {
+    failed.push(current);
+  }
+
+  loadNext();
+}
   else{ failed.push(current); }
   loadNext();
 }
