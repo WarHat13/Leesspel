@@ -15,7 +15,9 @@ html, body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  overflow-x: hidden; /* VERHOED ENIGE HORIZONTALE SCROLL */
   font-family: Arial, sans-serif;
+}
 }
 
 .screen {
@@ -93,25 +95,27 @@ html, body {
   position: absolute;
   top: 10px;
   left: 0;
-  width: 100%;
-  padding: 0 14px;
+  right: 0;           /* BELANGRIK: keer oorloop regs */
+  padding: 0 12px;    /* effens kleiner */
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 18px;
   font-weight: 700;
 }
+}
 
 #stamps {
   display: flex;
   gap: 6px;
-  max-width: 40vw; /* hou stempels binne skerm */
-  overflow: hidden; /* geen horisontale scroll */
+  max-width: 34vw;     /* streng binne skerm */
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 #stamps img {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   flex-shrink: 0;
 }
 
