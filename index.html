@@ -164,7 +164,7 @@ html, body {
     <span>L</span><span>e</span><span>e</span><span>s</span>
   </div>
 
-  <input id="timeInput" type="number" min="1" max="20" placeholder="Tyd">
+  <input id="timeInput" type="number" min="1" max="30" placeholder="Tyd">
 
   <div class="start-row">
     <button onclick="startGame()">Speel</button>
@@ -226,7 +226,7 @@ function showScreen(id){
 
 function startGame(){
   let t = document.getElementById("timeInput").value;
-  if(!t || t > 20){ alert("Kies eers 'n tyd!"); return; }
+  if(!t || t > 30){ alert("Kies eers 'n tyd!"); return; }
 
   score = 0;
   startTime = parseInt(t);
