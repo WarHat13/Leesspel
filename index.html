@@ -42,7 +42,7 @@ html, body {
 .rainbow span:nth-child(5){color:#4d7cff;}
 .rainbow span:nth-child(6){color:#d066ff;}
 
-/* OPENING SKERM */
+/* OPENING */
 #timeInput {
   width: 220px;
   height: 64px;
@@ -76,7 +76,7 @@ html, body {
   background: linear-gradient(90deg,#00cfff,#4dff88,#ffda44,#ff5c5c);
 }
 
-/* SPEEL SKERM */
+/* SPEEL */
 .top-bar {
   position: absolute;
   top: 10px;
@@ -188,11 +188,12 @@ html, body {
 
 <!-- VIDEO -->
 <div id="videoScreen" class="screen hidden">
-  <video id="reward" src="Video.mp4"></video>
+  <video id="reward"></video>
   <button onclick="stopVideoAndHome()">Gaan terug</button>
 </div>
 
 <script>
+/* SINNE */
 let sentences = [
  {s:"Sus slaap op die _________.", a:"bed", c:["bed","stoel","tafel"]},
  {s:"Boet skop die _________.", a:"bal", c:["das","blik","bal"]},
@@ -202,39 +203,49 @@ let sentences = [
  {s:"Oupa kuier by ons in die _________.", a:"tuin", c:["skool","tuin","pad"]},
  {s:"Pappa maak vuur vir _________.", a:"braai", c:["braai","slaai","grond"]},
  {s:"Die hond _________ vir die kat.", a:"blaf", c:["snork","blaf","rol"]},
- {s:"My speelgoed lê orals ________.", a:"rond", c:["rond","driehoek","vierkant"]}
+ {s:"My speelgoed lê orals ________.", a:"rond", c:["rond","driehoek","vierkant"]},
+
+ {s:"Die man ry in sy __________.", a:"motor", c:["huis","motor","kamer"]},
+ {s:"Die kat drink haar _________.", a:"melk", c:["pille","melk","bakkie"]},
+ {s:"Ons familie is _________ vir mekaar.", a:"lief", c:["lief","baie","groot"]},
+ {s:"Die dogtertjie __________ in die swembad.", a:"swem", c:["ry","vlieg","swem"]},
+ {s:"Vandag het ons lekker __________.", a:"gespeel", c:["gespeel","snaaks","wakker"]}
 ];
+
+/* VIDEOS */
+let videos = ["Video1.mp4","Video2.mp4","Video3.mp4"];
 
 let timer, timeLeft, startTime, score = 0;
 let remaining = [], failed = [], current;
 
 function showScreen(id){
-  ['start','game','videoScreen'].forEach(s =>
-    document.getElementById(s).classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
+  ["start","game","videoScreen"].forEach(s =>
+    document.getElementById(s).classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
 }
 
 function startGame(){
-  let t = document.getElementById('timeInput').value;
+  let t = document.getElementById("timeInput").value;
   if(!t || t > 20){ alert("Kies eers 'n tyd!"); return; }
 
   score = 0;
   startTime = parseInt(t);
   remaining = [...sentences];
   failed = [];
-  document.getElementById('stamps').innerHTML = '';
+  document.getElementById("stamps").innerHTML = "";
 
-  showScreen('game');
+  showScreen("game");
   loadNext();
 }
 
 function resetTimer(){
   clearInterval(timer);
   timeLeft = startTime;
-  document.getElementById('timer').textContent = timeLeft;
+  document.getElementById("timer").textContent = timeLeft;
+
   timer = setInterval(()=>{
     timeLeft--;
-    document.getElementById('timer').textContent = timeLeft;
+    document.getElementById("timer").textContent = timeLeft;
     if(timeLeft <= 0){
       failed.push(current);
       loadNext();
@@ -244,25 +255,26 @@ function resetTimer(){
 
 function loadNext(){
   if(score >= 5){ endGame(); return; }
+
   if(remaining.length === 0){
     remaining = [...failed];
     failed = [];
   }
 
   current = remaining.shift();
-  document.getElementById('sentence').textContent = current.s;
+  document.getElementById("sentence").textContent = current.s;
 
   let shuffled = [...current.c].sort(()=>Math.random()-0.5);
-  let ch=document.getElementById('choices');
-  ch.innerHTML='';
+  let ch = document.getElementById("choices");
+  ch.innerHTML = "";
 
   resetTimer();
 
   shuffled.forEach(w=>{
-    let d=document.createElement('div');
-    d.className='choice';
-    d.textContent=w;
-    d.onclick=()=>check(w);
+    let d = document.createElement("div");
+    d.className = "choice";
+    d.textContent = w;
+    d.onclick = ()=>check(w);
     ch.appendChild(d);
   });
 }
@@ -270,11 +282,11 @@ function loadNext(){
 function check(w){
   clearInterval(timer);
 
-  if(w===current.a){
+  if(w === current.a){
     score++;
-    let img=document.createElement('img');
-    img.src='Eend.png';
-    document.getElementById('stamps').appendChild(img);
+    let img = document.createElement("img");
+    img.src = "Eend.png";
+    document.getElementById("stamps").appendChild(img);
   } else {
     failed.push(current);
   }
@@ -284,27 +296,33 @@ function check(w){
 
 function endGame(){
   clearInterval(timer);
-  showScreen('videoScreen');
-  let v=document.getElementById('reward');
-  v.currentTime=0;
-  v.play();
+
+  let video = document.getElementById("reward");
+  let chosen = videos[Math.floor(Math.random()*videos.length)];
+  video.src = chosen;
+
+  showScreen("videoScreen");
+  video.currentTime = 0;
+  video.play();
+
+  video.onended = ()=> goHome();
 }
 
 function stopVideoAndHome(){
-  let v=document.getElementById('reward');
+  let v = document.getElementById("reward");
   v.pause();
-  v.currentTime=0;
+  v.currentTime = 0;
   goHome();
 }
 
 function goHome(){
   clearInterval(timer);
-  document.getElementById('timeInput').value='';
-  showScreen('start');
+  document.getElementById("timeInput").value = "";
+  showScreen("start");
 }
 
 function openAdd(){
-  alert('Voeg-By-skerm kan later hier kom');
+  alert("Voeg-By-skerm kan later hier kom");
 }
 </script>
 
