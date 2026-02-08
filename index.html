@@ -6,38 +6,29 @@
 <title>Lekker Lees</title>
 
 <style>
-/* =====================
-   STABIELE SELFON-UITLEG (GEKALIBREER)
-===================== */
 html, body {
   width: 100%;
   height: 100%;
   margin: 0;
   padding: 0;
   overflow: hidden;
-  overflow-x: hidden; /* VERHOED ENIGE HORIZONTALE SCROLL */
   font-family: Arial, sans-serif;
-}
 }
 
 .screen {
   position: absolute;
   inset: 0;
-  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   background: url('Agtergrond.png') no-repeat center center;
   background-size: cover;
-
 }
 
-.hidden { display: none; z-index: 0; }
+.hidden { display: none; }
 
-/* =====================
-   TITEL
-===================== */
+/* TITEL */
 .title {
   font-size: clamp(36px, 8vw, 56px);
   font-weight: 800;
@@ -51,9 +42,7 @@ html, body {
 .rainbow span:nth-child(5){color:#4d7cff;}
 .rainbow span:nth-child(6){color:#d066ff;}
 
-/* =====================
-   OPENING SKERM
-===================== */
+/* OPENING SKERM */
 #timeInput {
   width: 220px;
   height: 64px;
@@ -74,7 +63,6 @@ html, body {
 
 .start-row img {
   width: 180px;
-  height: auto;
 }
 
 .start-row button {
@@ -88,35 +76,23 @@ html, body {
   background: linear-gradient(90deg,#00cfff,#4dff88,#ffda44,#ff5c5c);
 }
 
-/* =====================
-   SPEEL SKERM
-===================== */
+/* SPEEL SKERM */
 .top-bar {
   position: absolute;
   top: 10px;
   left: 0;
-  right: 0;           /* BELANGRIK: keer oorloop regs */
-  padding: 0 12px;    /* effens kleiner */
+  width: 100%;
+  padding: 0 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 18px;
   font-weight: 700;
 }
-}
 
 #stamps {
   display: flex;
   gap: 6px;
-  max-width: 34vw;     /* streng binne skerm */
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-#stamps img {
-  width: 26px;
-  height: 26px;
-  flex-shrink: 0;
 }
 
 #stamps img {
@@ -160,9 +136,7 @@ html, body {
   color: white;
 }
 
-/* =====================
-   VIDEO SKERM
-===================== */
+/* VIDEO */
 #videoScreen video {
   width: 90%;
   max-height: 55%;
@@ -179,9 +153,10 @@ html, body {
 }
 </style>
 </head>
+
 <body>
 
-<!-- ================= OPENING SKERM ================= -->
+<!-- OPENING -->
 <div id="start" class="screen">
   <div class="title rainbow">
     <span>L</span><span>e</span><span>k</span><span>k</span><span>e</span><span>r</span>
@@ -198,7 +173,7 @@ html, body {
   </div>
 </div>
 
-<!-- ================= SPEEL SKERM ================= -->
+<!-- SPEEL -->
 <div id="game" class="screen hidden">
   <div class="top-bar">
     <div>Tyd: <span id="timer"></span></div>
@@ -211,16 +186,14 @@ html, body {
   <button class="back-btn" onclick="goHome()">Terug</button>
 </div>
 
-<!-- ================= VIDEO SKERM ================= -->
+<!-- VIDEO -->
 <div id="videoScreen" class="screen hidden">
   <video id="reward" src="Video.mp4"></video>
   <button onclick="stopVideoAndHome()">Gaan terug</button>
 </div>
 
 <script>
-/* ================= SPEL LOGIKA ================= */
-
-let sentences = JSON.parse(localStorage.getItem('lekkerlees')) || [
+let sentences = [
  {s:"Sus slaap op die _________.", a:"bed", c:["bed","stoel","tafel"]},
  {s:"Boet skop die _________.", a:"bal", c:["das","blik","bal"]},
  {s:"Die huis het 'n __________ op.", a:"dak", c:["vloer","dak","venster"]},
@@ -232,7 +205,7 @@ let sentences = JSON.parse(localStorage.getItem('lekkerlees')) || [
  {s:"My speelgoed lê orals ________.", a:"rond", c:["rond","driehoek","vierkant"]}
 ];
 
-let timer, timeLeft, startTime, score;
+let timer, timeLeft, startTime, score = 0;
 let remaining = [], failed = [], current;
 
 function showScreen(id){
@@ -240,14 +213,6 @@ function showScreen(id){
     document.getElementById(s).classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
 }
-
-document.addEventListener('DOMContentLoaded', ()=>{
-  const playBtn = document.querySelector('#start button:nth-of-type(1)');
-  const addBtn  = document.querySelector('#start button:nth-of-type(2)');
-
-  if(playBtn) playBtn.addEventListener('click', startGame);
-  if(addBtn)  addBtn.addEventListener('click', openAdd);
-});
 
 function startGame(){
   let t = document.getElementById('timeInput').value;
@@ -270,19 +235,26 @@ function resetTimer(){
   timer = setInterval(()=>{
     timeLeft--;
     document.getElementById('timer').textContent = timeLeft;
-    if(timeLeft <= 0){ failed.push(current); loadNext(); }
+    if(timeLeft <= 0){
+      failed.push(current);
+      loadNext();
+    }
   },1000);
 }
 
 function loadNext(){
   if(score >= 5){ endGame(); return; }
-  if(remaining.length === 0){ remaining = [...failed]; failed = []; }
+  if(remaining.length === 0){
+    remaining = [...failed];
+    failed = [];
+  }
 
   current = remaining.shift();
   document.getElementById('sentence').textContent = current.s;
 
   let shuffled = [...current.c].sort(()=>Math.random()-0.5);
-  let ch=document.getElementById('choices'); ch.innerHTML='';
+  let ch=document.getElementById('choices');
+  ch.innerHTML='';
 
   resetTimer();
 
@@ -290,22 +262,23 @@ function loadNext(){
     let d=document.createElement('div');
     d.className='choice';
     d.textContent=w;
-    d.addEventListener('click', ()=>check(w));
+    d.onclick=()=>check(w);
     ch.appendChild(d);
   });
 }
 
 function check(w){
   clearInterval(timer);
-  if(w === current.a){
+
+  if(w===current.a){
     score++;
-    let stamp = document.createElement('img');
-    stamp.src = 'Eend.png';
-    stamp.alt = 'Ducky';
-    document.getElementById('stamps').appendChild(stamp);
+    let img=document.createElement('img');
+    img.src='Eend.png';
+    document.getElementById('stamps').appendChild(img);
   } else {
     failed.push(current);
   }
+
   loadNext();
 }
 
@@ -313,12 +286,14 @@ function endGame(){
   clearInterval(timer);
   showScreen('videoScreen');
   let v=document.getElementById('reward');
-  v.currentTime=0; v.play();
+  v.currentTime=0;
+  v.play();
 }
 
 function stopVideoAndHome(){
   let v=document.getElementById('reward');
-  v.pause(); v.currentTime=0;
+  v.pause();
+  v.currentTime=0;
   goHome();
 }
 
