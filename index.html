@@ -158,13 +158,82 @@ button{
   min-width:200px;
 }
 
+/* ===== ULTRA KIND-VRIENDELIKE SELFOON STYL ===== */
+
+/* REËNBOOG-TITEL */
+.rainbow span:nth-child(1){color:#00e5ff;}
+.rainbow span:nth-child(2){color:#ff1744;}
+.rainbow span:nth-child(3){color:#ffea00;}
+.rainbow span:nth-child(4){color:#76ff03;}
+.rainbow span:nth-child(5){color:#2979ff;}
+.rainbow span:nth-child(6){color:#d500f9;}
+.rainbow span:nth-child(8){color:#ff9100;}
+.rainbow span:nth-child(9){color:#00e676;}
+.rainbow span:nth-child(10){color:#651fff;}
+
+.title{
+  font-size:72px;
+  margin-bottom:16px;
+}
+
+/* OPENING SKERM KNOPPIES – DUBBEL GROOT & NEON */
+.start-row button{
+  font-size:38px;
+  padding:30px 28px;
+  border-radius:22px;
+  background:linear-gradient(90deg,#00e5ff,#76ff03,#ffea00,#ff1744,#d500f9);
+  box-shadow:0 0 18px rgba(255,255,255,0.6);
+}
+
+#timeInput{
+  width:280px;
+  height:110px;
+  font-size:56px;
+  margin:20px 0 30px;
+}
+
+.start-row img{
+  width:260px;
+}
+
+/* SPEL SKERM – SIN & KEUSES 4x GROTER */
+.sentence{
+  font-size:64px;
+  line-height:1.4;
+  margin:40px 20px;
+}
+
+#choices{
+  display:flex;
+  justify-content:center;
+  gap:36px; /* verder uitmekaar */
+}
+
+.choice{
+  font-size:44px;
+  padding:32px 28px;
+  min-width:180px;
+  border-radius:20px;
+}
+
+/* TERUG KNOPPIE */
+#game button{
+  font-size:34px;
+  padding:26px 32px;
+  margin-top:40px;
+}
+
 </style>
 </head>
 <body>
 
 <!-- OPENING SKERM -->
 <div id="start" class="screen">
-  <div class="title rainbow">Lekker Lees</div><br>
+  <div class="title rainbow">
+  <span>L</span><span>e</span><span>k</span><span>k</span><span>e</span><span>r</span>
+  <span> </span>
+  <span>L</span><span>e</span><span>e</span><span>s</span>
+</div><br>
   <div>Tyd</div>
   <input id="timeInput" type="number" min="1" max="20"><br>
   <div class="start-row">
