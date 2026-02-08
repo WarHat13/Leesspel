@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="af">
+<head>
+<meta charset="UTF-8">
+<title>Lekker Lees</title>
+<style>
+
+* { font-family: Arial, sans-serif; box-sizing: border-box; }
+body { margin: 0; }
+.screen {
+  width: 100vw;
+  height: 100dvh;
+  background: url('Agtergrond.png') no-repeat center center;
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.hidden { display: none; }
+.title {
+  font-size: 48px;
+  font-weight: bold;
+  text-align: center;
+}
+.start-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 18px;
+  width: 100%;
+  max-width: 360px;
+  margin-top: 24px;
+}
+button {
+  font-size: 24px;
+  padding: 16px;
+  cursor: pointer;
+  width: 100%;
+  border-radius: 14px;
+}
+input {
+  font-size: 26px;
+  width: 100%;
+  max-width: 180px;
+  padding: 12px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+.choice {
+  font-size: 24px;
+  padding: 18px;
+  border: 3px solid #333;
+  margin: 10px 6px;
+  cursor: pointer;
+  display: inline-block;
+  min-width: 120px;
+  text-align: center;
+  border-radius: 12px;
+}
+.top-bar { display: flex; justify-content: space-between; width: 90%; position: absolute; top: 20px; }
+.stamps div { width: 55px; height: 55px; border: 2px solid #333; display: inline-block; }
+.stamps img { width: 100%; height: 100%; }
+.sentence {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 16px 0 24px;
+  text-align: center;
+}
+.video-box { position: absolute; bottom: 40px; }
+</style>
+</head>
+<body>
+
+<!-- OPENING SKERM -->
+<div id="start" class="screen">
+  <div class="title">Lekker Lees</div><br>
+  <div>Tyd</div>
+  <input id="timeInput" type="number" min="1" max="20"><br>
+  <div class="start-row">
+    <button type="button" onclick="startGame()">Speel</button>
+    <img src="Lees.png" style="width:220px;background:transparent">
+    <button type="button" onclick="openAdd()">Voeg By</button>
+  </div>
+</div>
+
+<!-- SPEEL SKERM -->
+<div id="game" class="screen hidden">
+  <div class="top-bar">
+    <div>Tyd: <span id="timer"></span></div>
+    <div class="stamps" id="stamps"></div>
+  </div>
+  <div class="sentence" id="sentence"></div>
+  <div id="choices"></div>
+  <div style="position:absolute; bottom:30px;">
+    <button onclick="goHome(true)">Terug</button>
+  </div>
+</div>
+
+<!-- ADD SKERM -->
+<div id="add" class="screen hidden">
+  <h2>Voeg nuwe sin by</h2>
+  <input id="newSentence" placeholder="Sin met _______" style="width:60%"><br>
+  <input id="w1" placeholder="Korrekte woord"><br>
+  <input id="w2" placeholder="Verkeerde woord">
+  <input id="w3" placeholder="Verkeerde woord"><br>
+  <button onclick="saveSentence()">Bewaar</button>
+  <button onclick="goHome()">Terug</button>
+</div>
+
+<!-- VIDEO -->
+<div id="videoScreen" class="screen hidden">
+  <video id="reward" style="width:80%;max-height:70%" src="Video.mp4"></video>
+  <div class="video-box"><button onclick="stopVideoAndHome()">Gaan terug</button></div>
+</div>
+
+<script>
+function showBigMessage(msg){
+  let overlay=document.createElement('div');
+  overlay.style.position='fixed'; overlay.style.top='0'; overlay.style.left='0';
+  overlay.style.width='100vw'; overlay.style.height='100vh';
+  overlay.style.background='rgba(0,0,0,0.7)';
+  overlay.style.display='flex'; overlay.style.alignItems='center'; overlay.style.justifyContent='center';
+  overlay.onclick=()=>overlay.remove();
+  let box=document.createElement('div');
+  box.style.background='white'; box.style.padding='50px'; box.style.fontSize='52px'; box.style.fontWeight='bold'; box.style.borderRadius='20px';
+  box.textContent=msg;
+  overlay.appendChild(box); document.body.appendChild(overlay);
+}
+
+let baseSentences = [
+ {s:"Sus slaap op die _________.", a:"bed", c:["bed","stoel","tafel"]},
+ {s:"Boet skop die _________.", a:"bal", c:["das","blik","bal"]},
+ {s:"Die huis het 'n __________ op.", a:"dak", c:["vloer","dak","venster"]},
+ {s:"Juffrou lees 'n __________.", a:"boek", c:["kar","boek","vurk"]},
+ {s:"Mamma maak vir ons ________.", a:"kos", c:["vuur","hout","kos"]},
+ {s:"Oupa kuier by ons in die _________.", a:"tuin", c:["skool","tuin","pad"]},
+ {s:"Pappa maak vuur vir _________.", a:"braai", c:["braai","slaai","grond"]},
+ {s:"Die hond _________ vir die kat.", a:"blaf", c:["snork","blaf","rol"]},
+ {s:"My speelgoed lê orals ________.", a:"rond", c:["rond","driehoek","vierkant"]}
+];
+
+let sentences = JSON.parse(localStorage.getItem('lekkerlees')) || baseSentences;
+let timer, timeLeft, startTime, score;
+let remaining = [];
+let failed = [];
+let current;
+
+function startGame(){
+  let t = document.getElementById('timeInput').value;
+  if(!t || t > 20){ showBigMessage("Kies eers 'n tyd!"); return; }
+
+  score = 0;
+  startTime = parseInt(t);
+  remaining = [...sentences];
+  failed = [];
+  document.getElementById('stamps').innerHTML = '';
+
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('add').classList.add('hidden');
+  document.getElementById('videoScreen').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+
+  loadNext();
+}
+
+function resetTimer(){
+  clearInterval(timer);
+  timeLeft = startTime;
+  document.getElementById('timer').textContent = timeLeft;
+  timer = setInterval(()=>{
+    timeLeft--;
+    document.getElementById('timer').textContent = timeLeft;
+    if(timeLeft <= 0){ failed.push(current); loadNext(); }
+  },1000);
+}
+
+function loadNext(){
+  if(score >= 5){ endGame(); return; }
+  if(remaining.length === 0){ remaining = [...failed]; failed = []; }
+
+  current = remaining.shift();
+  document.getElementById('sentence').textContent = current.s;
+
+  let shuffled = [...current.c].sort(()=>Math.random()-0.5);
+  let ch=document.getElementById('choices'); ch.innerHTML='';
+
+  resetTimer();
+
+  shuffled.forEach(w=>{
+    let d=document.createElement('div'); d.className='choice'; d.textContent=w;
+    d.onclick=()=>check(w);
+    ch.appendChild(d);
+  });
+}
+
+function check(w){
+  clearInterval(timer);
+  if(w === current.a){
+    score++;
+    let s=document.createElement('div'); s.innerHTML='<img src="Eend.png">';
+    document.getElementById('stamps').appendChild(s);
+  } else {
+    failed.push(current);
+  }
+  loadNext();
+}
+
+function endGame(){
+  clearInterval(timer);
+  document.getElementById('game').classList.add('hidden');
+  let vs=document.getElementById('videoScreen');
+  let v=document.getElementById('reward');
+  vs.classList.remove('hidden');
+  v.currentTime=0;
+  v.play();
+}
+
+function stopVideoAndHome(){
+  const v=document.getElementById('reward');
+  v.pause();
+  v.currentTime=0;
+  goHome();
+}
+
+function goHome(reset=true){
+  clearInterval(timer);
+  score = 0;
+  remaining = [];
+  failed = [];
+  document.getElementById('timeInput').value='';
+
+  const v = document.getElementById('reward');
+  v.pause();
+  v.currentTime = 0;
+
+  document.getElementById('videoScreen').classList.add('hidden');
+  document.getElementById('add').classList.add('hidden');
+  document.getElementById('game').classList.add('hidden');
+  document.getElementById('start').classList.remove('hidden');
+}
+
+function openAdd(){
+  clearInterval(timer);
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('game').classList.add('hidden');
+  document.getElementById('videoScreen').classList.add('hidden');
+  document.getElementById('add').classList.remove('hidden');
+}
+
+function saveSentence(){
+  let s=document.getElementById('newSentence').value;
+  let a=document.getElementById('w1').value;
+  let c=[a,document.getElementById('w2').value,document.getElementById('w3').value];
+  sentences.push({s:s,a:a,c:c});
+  localStorage.setItem('lekkerlees',JSON.stringify(sentences));
+  goHome();
+}
+</script>
+</body>
+</html>
